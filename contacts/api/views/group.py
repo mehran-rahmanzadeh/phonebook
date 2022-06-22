@@ -5,6 +5,7 @@ from contacts.api.serializers.group import (
     CreateGroupSerializer,
     GroupSerializer
 )
+from contacts.models import Group
 
 
 class GroupViewSet(ModelViewSet):
@@ -17,5 +18,5 @@ class GroupViewSet(ModelViewSet):
         return GroupSerializer
 
     def get_queryset(self):
-        qs = super(GroupViewSet, self).get_queryset()
-        return qs.filter(user=self.request.user)
+        qs = Group.objects.all()
+        return qs.filter(user=self.request.user).prefetch_related('contacts')
