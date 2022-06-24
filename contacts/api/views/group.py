@@ -18,5 +18,6 @@ class GroupViewSet(ModelViewSet):
         return GroupSerializer
 
     def get_queryset(self):
-        qs = Group.objects.all()
-        return qs.filter(user=self.request.user).prefetch_related('contacts')
+        qs = Group.objects.filter(
+            user=self.request.user).prefetch_related('contacts')
+        return qs

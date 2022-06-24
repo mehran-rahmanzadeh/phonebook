@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -17,7 +16,13 @@ from contacts.api.serializers.contact import (
 )
 from contacts.models.contact import Contact
 from contacts.models.group import Group
-from painless.utils.constants.messages import ADDED_SUCCESS, REMOVED_SUCCESS
+from painless.utils.constants.messages import (
+    ADDED_SUCCESS,
+    REMOVED_SUCCESS,
+    NO_DUPLICATE,
+    NO_FILTER_TERM,
+    MERGE_SUCCESS
+)
 from painless.utils.tools.dictionary import remove_none_values
 
 
@@ -71,14 +76,24 @@ class ContactViewSet(ModelViewSet):
     def duplicates(self, *args, **kwargs):
         merge = self.request.query_params.get('merge', False)
         qs = self.filter_queryset(self.get_queryset())
-        if merge:
-            if not qs.exists():
-                response = {
-                    'message': 'No object exists'
-                }
-                code = status.HTTP_404_NOT_FOUND
-                return Response(data=response, status=code)
 
+        # check is there duplicate values
+        if qs.count() <= 1:
+            response = {
+                'message': NO_DUPLICATE
+            }
+            code = status.HTTP_204_NO_CONTENT
+            return Response(data=response, status=code)
+
+        # check filter query params provided by user
+        if len(set(self.request.query_params.keys()).intersection(set(self.filterset_fields))) == 0:
+            response = {
+                'message': NO_FILTER_TERM
+            }
+            code = status.HTTP_400_BAD_REQUEST
+            return Response(data=response, status=code)
+
+        if merge:
             count = qs.count()
             # convert all objs to dict (using iterator for performance)
             objs = [
@@ -102,7 +117,7 @@ class ContactViewSet(ModelViewSet):
             qs.exclude(id=primary.id).delete()
 
             response = {
-                'message': f'{count} objects merged successfully'
+                'message': MERGE_SUCCESS.format(count)
             }
             code = status.HTTP_202_ACCEPTED
             return Response(data=response, status=code)
