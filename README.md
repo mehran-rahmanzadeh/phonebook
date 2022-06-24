@@ -27,7 +27,7 @@ $ pip install -r requirements.txt
 2. Generate jwt RSA keys (without passphrase)
 ```bash
 $ ssh-keygen -t rsa -b 4096 -m PEM -f jwt-key
-$ openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwt-key.pub
+$ openssl rsa -in jwt-key -pubout -outform PEM -out jwt-key.pub
 ```
 3. Create postgres db
 ``` sql
