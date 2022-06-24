@@ -49,6 +49,10 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ),
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.BasicAuthentication',  # TODO: Should be removed in production
+    ),
     # 'DEFAULT_THROTTLE_CLASSES': [
     #     'rest_framework.throttling.AnonRateThrottle'
     # ],
@@ -100,9 +104,6 @@ CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_TASK_ROUTES = {
-    'authentication.tasks.send_mail': {'queue': 'email'}  # TODO: should be changed
-}
 CELERY_ENABLE_UTC = True
 CELERY_TIMEZONE = 'UTC'
 
@@ -140,10 +141,6 @@ ADMIN_FOOTER_DATA = {
 # #################### #
 # IMPORTANT VARIABLES  #
 # #################### #
-
-# LOGIN_REDIRECT_URL = '/portal'
-# LOGIN_URL = '/auth/login'
-# LOGOUT_REDIRECT_URL = '/'
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # ########################### #
@@ -156,24 +153,6 @@ CORS_ALLOW_HEADERS = list(default_headers)
 CORS_ALLOW_METHODS = list(default_methods)
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True  # TODO: should be changed in production
-
-# ################## #
-#   Debug Toolbar    #
-# ################## #
-# INTERNAL_IPS = [
-#     "127.0.0.1",
-# ]
-#
-#
-# def custom_show_toolbar(request):
-#     return True
-#
-#
-# DEBUG_TOOLBAR_CONFIG = {
-#     'SHOW_TOOLBAR_CALLBACK': custom_show_toolbar,
-#     'INSERT_BEFORE': '</body>'
-# }
-
 
 CACHALOT_UNCACHABLE_APPS = ('admin', 'auth', 'calls')
 
