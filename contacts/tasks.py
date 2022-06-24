@@ -25,7 +25,9 @@ def send_contact_daily_notification():
             u.last_day_contact_count = today_count  # update last day's contact count
             objs_to_update.append(u)  # add to bulk_update list
         else:  # ignore if user has no email
-            continue
+            today_count = u.contacts.count()
+            u.last_day_contact_count = today_count
+            objs_to_update.append(u)
 
     # send mass emails chunk by chunk using Celery (check EMAIL_BACKEND for more detail)
     send_mass_mail(mails)
