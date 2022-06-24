@@ -2,24 +2,9 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
+from django.core.mail import send_mass_mail
 
 logger = get_task_logger(__name__)
-
-
-@shared_task
-def notify_user(user):
-    """send mail to user"""
-    user = get_user_model().objects.get(id=user)
-    email_to = user.email
-    email_from = settings.DEFAULT_FROM_EMAIL
-    yesterday_count = user.last_day_contact_count
-    today_count = user.contacts.count()
-    text = f'yesterday: {yesterday_count}, today: {today_count}'
-    user.last_day_contact_count = today_count
-    user.save()
-    send_mail("Contacts count notification =)", text, email_from, [email_to])
-    logger.info(f"Contact count notify user: {user.sku}")
 
 
 @shared_task
@@ -27,8 +12,24 @@ def send_contact_daily_notification():
     """send email to all users each day
     email contains count of contacts in yesterday and today
     """
-    for u in get_user_model().objects.iterator():
+    mails = tuple()
+    subject = "Contacts count notification =)"
+    email_from = settings.DEFAULT_FROM_EMAIL
+    objs_to_update = []
+    for u in get_user_model().actives.iterator():
         if u.email:
-            notify_user.delay(user=u.id)
-        else:
+            yesterday_count = u.last_day_contact_count
+            today_count = u.contacts.count()
+            message = f'yesterday: {yesterday_count}, today: {today_count}'
+            mails += ((subject, message, email_from, [u.email]),)  # add to mass email payload
+            u.last_day_contact_count = today_count  # update last day's contact count
+            objs_to_update.append(u)  # add to bulk_update list
+        else:  # ignore if user has no email
             continue
+
+    # send mass emails chunk by chunk using Celery (check EMAIL_BACKEND for more detail)
+    send_mass_mail(mails)
+    logger.info(f"{len(mails)} emails sent to users")
+
+    # update all user's last_day_contact_count
+    get_user_model().objects.bulk_update(objs_to_update, ['last_day_contact_count'])
