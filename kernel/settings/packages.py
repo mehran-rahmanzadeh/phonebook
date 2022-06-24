@@ -26,6 +26,7 @@ INSTALLED_APPS.append('admin_honeypot')
 INSTALLED_APPS.append('cachalot')
 INSTALLED_APPS.append('drf_yasg')
 INSTALLED_APPS.append('django_celery_beat')
+INSTALLED_APPS.append('djcelery_email')
 
 # Log
 
@@ -180,3 +181,5 @@ OTP_TOKEN_EXPIRE_TIME = 120
 OTP_REDIS_HOST = config('OTP_REDIS_HOST')
 OTP_REDIS_PORT = config('OTP_REDIS_PORT')
 OTP_REDIS_NAME = config('OTP_REDIS_NAME')
+
+EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
