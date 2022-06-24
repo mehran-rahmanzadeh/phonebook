@@ -13,5 +13,5 @@ class UserViewSet(ModelViewSet):
     lookup_field = 'sku'
 
     def get_queryset(self):
-        qs = super(UserViewSet, self).get_queryset()
-        return qs.filter(sku=self.request.user.sku)
+        qs = User.actives.filter(sku=self.request.user.sku)
+        return qs

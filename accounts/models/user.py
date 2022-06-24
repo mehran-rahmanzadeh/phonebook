@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from accounts.managers import CustomUserManager
+from accounts.managers import CustomUserManager, ActiveUserManager
 from painless.utils.models.mixins import Sku_Mixin, TimeStampModelMixin
 from painless.utils.models.validations import PersianPhoneNumberValidator
 
@@ -42,6 +42,7 @@ class CustomUser(Sku_Mixin, AbstractUser, TimeStampModelMixin):
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
+    actives = ActiveUserManager()
 
     def __str__(self):
         return f'{self.get_full_name()}-{self.phone_number}'
