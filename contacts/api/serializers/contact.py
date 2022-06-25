@@ -36,7 +36,12 @@ class ContactSerializer(ModelSerializer):
 
 
 class CreateContactSerializer(ModelSerializer):
-    """Create contact serializer"""
+    """Create contact serializer
+    phone_numbers: [
+        "0904714710",
+        "080198410"
+    ]
+    """
     phone_numbers = GetOrCreateSlugRelatedField(
         queryset=PhoneNumber.objects.all(),
         slug_field='value',

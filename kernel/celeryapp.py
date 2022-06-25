@@ -16,4 +16,12 @@ celery_app.conf.beat_schedule = {
         'task': 'contacts.tasks.send_contact_daily_notification',
         'schedule': crontab(hour="0", minute="0"),
     },
+    'merge_duplicates_first_try': {
+        'task': 'contacts.tasks.find_duplicates_and_merge',
+        'schedule': crontab(hour="12", minute="0")
+    },
+    'merge_duplicates_second_try': {
+        'task': 'contacts.tasks.find_duplicates_and_merge',
+        'schedule': crontab(hour="0", minute="0")
+    }
 }

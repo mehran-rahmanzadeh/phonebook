@@ -16,6 +16,7 @@ from contacts.api.serializers.contact import (
 )
 from contacts.models.contact import Contact
 from contacts.models.group import Group
+from contacts.utils import merge_qs
 from painless.utils.constants.messages import (
     ADDED_SUCCESS,
     REMOVED_SUCCESS,
@@ -95,26 +96,7 @@ class ContactViewSet(ModelViewSet):
 
         if merge:
             count = qs.count()
-            # convert all objs to dict (using iterator for performance)
-            objs = [
-                remove_none_values(model_to_dict(i, fields=['name', 'phone_numbers', 'email']))
-                for i in qs.iterator()
-            ]
-
-            # merge all dictionaries
-            merged_dict = ChainMap(*objs)
-
-            # fetch merged data
-            primary = qs.first()
-            for k, v in merged_dict.items():
-                if k == 'phone_numbers':
-                    primary.phone_numbers.set(v)
-                else:
-                    setattr(primary, k, v)
-            primary.save()
-
-            # delete other records
-            qs.exclude(id=primary.id).delete()
+            _ = merge_qs(qs)
 
             response = {
                 'message': MERGE_SUCCESS.format(count)
