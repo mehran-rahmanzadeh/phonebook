@@ -26,7 +26,7 @@ def send_contact_daily_notification():
             u.last_day_contact_count = today_count  # update last day's contact count
             objs_to_update.append(u)  # add to bulk_update list
         else:  # ignore if user has no email
-            today_count = u.contacts.count()
+            today_count = u.contacts_count
             u.last_day_contact_count = today_count
             objs_to_update.append(u)
 
