@@ -3,6 +3,7 @@ from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mass_mail
+from django.db.models import Count
 
 logger = get_task_logger(__name__)
 
@@ -16,10 +17,10 @@ def send_contact_daily_notification():
     subject = "Contacts count notification =)"
     email_from = settings.DEFAULT_FROM_EMAIL
     objs_to_update = []
-    for u in get_user_model().actives.iterator():
+    for u in get_user_model().actives.annotate(contacts_count=Count('contacts')).iterator():
         if u.email:
             yesterday_count = u.last_day_contact_count
-            today_count = u.contacts.count()
+            today_count = u.contacts_count
             message = f'yesterday: {yesterday_count}, today: {today_count}'
             mails += ((subject, message, email_from, [u.email]),)  # add to mass email payload
             u.last_day_contact_count = today_count  # update last day's contact count
